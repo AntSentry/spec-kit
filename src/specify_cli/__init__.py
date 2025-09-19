@@ -740,6 +740,7 @@ def init(
     ignore_agent_tools: bool = typer.Option(False, "--ignore-agent-tools", help="Skip checks for AI agent tools like Claude Code"),
     no_git: bool = typer.Option(False, "--no-git", help="Skip git repository initialization"),
     here: bool = typer.Option(False, "--here", help="Initialize project in the current directory instead of creating a new one"),
+    force_here: bool = typer.Option(False, "--force-here", help="When used with --here, auto-confirm merging into a non-empty directory (non-interactive)"),
     skip_tls: bool = typer.Option(False, "--skip-tls", help="Skip SSL/TLS verification (not recommended)"),
     debug: bool = typer.Option(False, "--debug", help="Show verbose diagnostic output for network and extraction failures"),
 ):
@@ -788,12 +789,14 @@ def init(
         if existing_items:
             console.print(f"[yellow]Warning:[/yellow] Current directory is not empty ({len(existing_items)} items)")
             console.print("[yellow]Template files will be merged with existing content and may overwrite existing files[/yellow]")
-            
-            # Ask for confirmation
-            response = typer.confirm("Do you want to continue?")
-            if not response:
-                console.print("[yellow]Operation cancelled[/yellow]")
-                raise typer.Exit(0)
+            if force_here:
+                console.print("[cyan]--force-here supplied: proceeding without interactive confirmation[/cyan]")
+            else:
+                # Ask for confirmation
+                response = typer.confirm("Do you want to continue?")
+                if not response:
+                    console.print("[yellow]Operation cancelled[/yellow]")
+                    raise typer.Exit(0)
     else:
         project_path = Path(project_name).resolve()
         # Check if project directory already exists
@@ -1047,6 +1050,51 @@ def check():
     if not (claude_ok or gemini_ok or cursor_ok or qwen_ok or opencode_ok or codex_ok):
         console.print("[dim]Tip: Install an AI assistant for the best experience[/dim]")
 
+
+@app.command()
+def doctor():
+    """Run local validation checks for Spec Kit environment and assets."""
+    show_banner()
+    console.print("[bold]Running environment and asset checks...[/bold]\n")
+
+    tracker = StepTracker("Doctor Checks")
+    for key, label in (
+        ("python", "Python available"),
+        ("compile", "Compile CLI (import/bytecode)"),
+        ("pkg-script", "Packaging script present"),
+        ("codex-sync-sh", "Codex sync (bash) present"),
+        ("codex-sync-ps1", "Codex sync (PowerShell) present"),
+        ("codex-templates", "Codex templates present"),
+    ):
+        tracker.add(key, label)
+
+    # Python check
+    if shutil.which("python3") or shutil.which("python"):
+        tracker.complete("python", "ok")
+    else:
+        tracker.error("python", "missing")
+
+    # Compile check
+    try:
+        import py_compile
+        root = Path(__file__).resolve().parents[2]
+        py_compile.compile(str(root / "src/specify_cli/__init__.py"), doraise=True)
+        tracker.complete("compile", "ok")
+    except Exception as e:
+        tracker.error("compile", str(e))
+
+    # File presence checks
+    root = Path(__file__).resolve().parents[2]
+    tracker.complete("pkg-script", "ok") if (root / ".github/workflows/scripts/create-release-packages.sh").exists() else tracker.error("pkg-script", "missing")
+    tracker.complete("codex-sync-sh", "ok") if (root / "scripts/bash/sync-codex-prompts.sh").exists() else tracker.error("codex-sync-sh", "missing")
+    tracker.complete("codex-sync-ps1", "ok") if (root / "scripts/powershell/sync-codex-prompts.ps1").exists() else tracker.error("codex-sync-ps1", "missing")
+    tracker.complete("codex-templates", "ok") if (root / "templates/commands/codex").exists() else tracker.error("codex-templates", "missing")
+
+    console.print(tracker.render())
+    console.print("\n[bold]Doctor finished.[/bold]")
+    # Exit non-zero on any error
+    if any(s.get("status") == "error" for s in tracker.steps):
+        raise typer.Exit(1)
 
 def main():
     app()
