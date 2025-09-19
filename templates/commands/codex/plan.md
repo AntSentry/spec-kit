@@ -7,6 +7,9 @@ scripts:
 
 Operate as an OpenAI Codex IDE agent and generate the Spec Kit implementation plan with resilience:
 
+Model tier: {MODEL_TIER} | Mode: {MODE}
+Mode guidance: fast → minimal research iterations; thorough → full critique + verify artifacts; safety → add preflight checks before file writes.
+
 1. Execute `{SCRIPT}` from repository root. Parse JSON for `FEATURE_SPEC`, `IMPL_PLAN`, `SPECS_DIR`, and `BRANCH`. Paths must be absolute.
 2. Load prerequisite context before writing:
    - `memory/constitution.md`
@@ -20,7 +23,7 @@ Operate as an OpenAI Codex IDE agent and generate the Spec Kit implementation pl
    - Execute **Phase 1 → design artifacts**: produce `data-model.md`, `contracts/`, and `quickstart.md` as instructed. Each artifact must live inside `SPECS_DIR`.
    - Execute **Phase 2 → tasks.md**: outline high-level milestones (detailed task breakdown comes later in `/tasks`).
    - Keep the Progress Tracker in sync—mark each phase `Complete` only after assets exist.
-5. Whenever the template instructs “Run command”, honor it exactly. Use Codex exec blocks (` ```bash … ````) so the user can replay shell steps.
+5. Whenever the template instructs “Run command”, honor it exactly. Use Codex exec blocks (` ```bash … ````) so the user can replay shell steps. In safety mode, prefer dry-run flags when available.
 6. After completing all phases, run Codex’s diff viewer to confirm the artifacts changed exactly where expected.
 7. In the final section of `IMPL_PLAN`, record:
    - Generated artifact paths

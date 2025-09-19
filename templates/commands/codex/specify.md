@@ -7,12 +7,15 @@ scripts:
 
 You are working inside the OpenAI Codex IDE with the Spec Kit project loaded. Follow this Codex-optimized flow:
 
+Model tier: {MODEL_TIER} | Mode: {MODE}
+Mode guidance: fast → concise + minimal iterations; thorough → deeper critique + validation; safety → add extra checks before writes.
+
 1. Execute `{SCRIPT}` from the project root. Parse the JSON for `BRANCH_NAME`, `SPEC_FILE`, and `SPECS_DIR`. All reported paths must be absolute.
 2. Read the following context before drafting anything:
    - `memory/constitution.md` for non-negotiable principles.
    - Repository-level `AGENTS.md` plus `SPECS_DIR/AGENTS.md` if present (Codex auto-merges them on session start; refresh if you just generated one).
    - `templates/spec-template.md` for required structure, including acceptance checklist.
-3. Start an `#analysis` scratchpad (Codex shortcut: Ctrl+L). Capture:
+3. Start an `#analysis` scratchpad (Codex shortcut: Ctrl+L). Capture (be brief in fast mode; expand in thorough/safety):
    - Key intent, actors, and constraints from the user arguments `{ARGS}`.
    - Any clarifying questions or gaps. If blockers exist, log them in the scratchpad and continue with best-effort assumptions, marking them as `OPEN QUESTION` in the spec.
    - Cross-check against constitution rules; note any friction.

@@ -743,6 +743,7 @@ def init(
     force_here: bool = typer.Option(False, "--force-here", help="When used with --here, auto-confirm merging into a non-empty directory (non-interactive)"),
     skip_tls: bool = typer.Option(False, "--skip-tls", help="Skip SSL/TLS verification (not recommended)"),
     debug: bool = typer.Option(False, "--debug", help="Show verbose diagnostic output for network and extraction failures"),
+    model_tier: str = typer.Option(None, "--model-tier", help="Codex-only: GPT-5 tier: minimal, low, medium, high, codex-low, codex-medium, codex-high"),
 ):
     """
     Initialize a new Specify project from the latest template.
@@ -876,6 +877,18 @@ def init(
     
     console.print(f"[cyan]Selected AI assistant:[/cyan] {selected_ai}")
     console.print(f"[cyan]Selected script type:[/cyan] {selected_script}")
+    # Handle Codex model tier (lightweight, optional)
+    selected_tier = None
+    if selected_ai == "codex":
+        allowed_tiers = {"minimal","low","medium","high","codex-low","codex-medium","codex-high"}
+        if model_tier and model_tier.lower() in allowed_tiers:
+            selected_tier = model_tier.lower()
+        elif model_tier:
+            console.print(f"[yellow]Unknown --model-tier '{model_tier}'. Using default: medium[/yellow]")
+            selected_tier = "medium"
+        else:
+            selected_tier = "medium"
+        console.print(f"[cyan]Codex model tier:[/cyan] {selected_tier}")
     
     # Download and set up project
     # New tree-based progress (no emojis); include earlier substeps
@@ -912,6 +925,20 @@ def init(
             local_client = httpx.Client(verify=local_ssl_context)
 
             download_and_extract_template(project_path, selected_ai, selected_script, here, verbose=False, tracker=tracker, client=local_client, debug=debug)
+
+            # Persist minimal Codex config if applicable
+            if selected_ai == "codex" and selected_tier:
+                try:
+                    cfg_dir = project_path if here else project_path
+                    cfg_path = cfg_dir / ".specify" / "codex.json"
+                    cfg_path.parent.mkdir(parents=True, exist_ok=True)
+                    with open(cfg_path, "w", encoding="utf-8") as f:
+                        json.dump({"modelTier": selected_tier}, f, indent=2)
+                    tracker.add("codex-tier", "Save Codex tier config")
+                    tracker.complete("codex-tier", selected_tier)
+                except Exception as e:
+                    tracker.add("codex-tier", "Save Codex tier config")
+                    tracker.error("codex-tier", str(e))
 
             # Ensure scripts are executable (POSIX)
             ensure_executable_scripts(project_path, tracker=tracker)
@@ -1065,6 +1092,7 @@ def doctor():
         ("codex-sync-sh", "Codex sync (bash) present"),
         ("codex-sync-ps1", "Codex sync (PowerShell) present"),
         ("codex-templates", "Codex templates present"),
+        ("codex-tier", "Codex model tier detected"),
     ):
         tracker.add(key, label)
 
@@ -1089,6 +1117,16 @@ def doctor():
     tracker.complete("codex-sync-sh", "ok") if (root / "scripts/bash/sync-codex-prompts.sh").exists() else tracker.error("codex-sync-sh", "missing")
     tracker.complete("codex-sync-ps1", "ok") if (root / "scripts/powershell/sync-codex-prompts.ps1").exists() else tracker.error("codex-sync-ps1", "missing")
     tracker.complete("codex-templates", "ok") if (root / "templates/commands/codex").exists() else tracker.error("codex-templates", "missing")
+    # Read codex tier if present
+    tier = None
+    cfg = root / ".specify" / "codex.json"
+    if cfg.exists():
+        try:
+            with open(cfg, "r", encoding="utf-8") as f:
+                tier = json.load(f).get("modelTier")
+        except Exception:
+            pass
+    tracker.complete("codex-tier", tier or "medium (default)")
 
     console.print(tracker.render())
     console.print("\n[bold]Doctor finished.[/bold]")

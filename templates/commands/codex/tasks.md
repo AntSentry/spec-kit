@@ -7,6 +7,9 @@ scripts:
 
 Run inside Codex IDE to create actionable tasks:
 
+Model tier: {MODEL_TIER} | Mode: {MODE}
+Mode guidance: fast → fewer, tightly-scoped tasks; thorough → more granular tasks + validation; safety → emphasize tests and guardrails first.
+
 1. Execute `{SCRIPT}` from repo root. Parse `FEATURE_DIR` and `AVAILABLE_DOCS[]`. All values must be absolute.
 2. Load every available artifact listed:
    - Always read `plan.md`.
