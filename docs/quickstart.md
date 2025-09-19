@@ -20,6 +20,8 @@ uvx --from git+https://github.com/github/spec-kit.git specify init <PROJECT_NAME
 uvx --from git+https://github.com/github/spec-kit.git specify init <PROJECT_NAME> --script sh  # Force POSIX shell
 ```
 
+If you selected `--ai codex`, run `.specify/scripts/bash/sync-codex-prompts.sh` (or the PowerShell equivalent) after initialization to install the Spec Kit slash commands into Codex.
+
 ### 2. Create the Spec
 
 Use the `/specify` command to describe what you want to build. Focus on the **what** and **why**, not the tech stack.

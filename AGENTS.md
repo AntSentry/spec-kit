@@ -28,7 +28,8 @@ This repository contains Spec Kit, a spec-driven development toolkit and the `sp
 - When bootstrapping a downstream project, the CLI supports `--ai codex`. If a Codex-specific template is not published yet, the CLI safely falls back to the Copilot template without breaking behavior.
 - Codex should follow these steps in downstream projects:
   - Run `specify init <project>` (or `--here`) to place templates and scripts.
-  - Invoke `/specify`, `/plan`, `/tasks` as described in `templates/commands/*.md`.
+  - Invoke `/specify`, `/plan`, `/tasks` as described in the Codex prompt overrides under `templates/commands/codex`.
+  - Run `.specify/scripts/bash/sync-codex-prompts.sh` (or the PowerShell variant) to publish the prompts into `~/.codex/prompts/` for slash access.
   - Always use absolute paths for file operations.
 
 ## Coding Style
@@ -50,4 +51,3 @@ This repository contains Spec Kit, a spec-driven development toolkit and the `sp
 ## Contact
 
 For broader changes, update docs under `docs/` and `README.md` together with CLI behavior to keep user-facing guidance in sync.
-

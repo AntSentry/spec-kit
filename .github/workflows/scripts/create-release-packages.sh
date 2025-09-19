@@ -37,27 +37,25 @@ rewrite_paths() {
 generate_commands() {
   local agent=$1 ext=$2 arg_format=$3 output_dir=$4 script_variant=$5
   mkdir -p "$output_dir"
-  for template in templates/commands/*.md; do
-    [[ -f "$template" ]] || continue
-    local name description script_command body
-    name=$(basename "$template" .md)
-    
-    # Normalize line endings
-    file_content=$(tr -d '\r' < "$template")
-    
-    # Extract description and script command from YAML frontmatter
+  local base_dir="templates/commands"
+  local override_dir="templates/commands/$agent"
+  declare -A seen
+
+  process_template() {
+    local template_path=$1 base_name=$2
+    local file_content description script_command body name
+    name=${base_name%.md}
+
+    file_content=$(tr -d '\r' < "$template_path")
     description=$(printf '%s\n' "$file_content" | awk '/^description:/ {sub(/^description:[[:space:]]*/, ""); print; exit}')
     script_command=$(printf '%s\n' "$file_content" | awk -v sv="$script_variant" '/^[[:space:]]*'"$script_variant"':[[:space:]]*/ {sub(/^[[:space:]]*'"$script_variant"':[[:space:]]*/, ""); print; exit}')
-    
+
     if [[ -z $script_command ]]; then
-      echo "Warning: no script command found for $script_variant in $template" >&2
+      echo "Warning: no script command found for $script_variant in $template_path" >&2
       script_command="(Missing script command for $script_variant)"
     fi
-    
-    # Replace {SCRIPT} placeholder with the script command
+
     body=$(printf '%s\n' "$file_content" | sed "s|{SCRIPT}|${script_command}|g")
-    
-    # Remove the scripts: section from frontmatter while preserving YAML structure
     body=$(printf '%s\n' "$body" | awk '
       /^---$/ { print; if (++dash_count == 1) in_frontmatter=1; else in_frontmatter=0; next }
       in_frontmatter && /^scripts:$/ { skip_scripts=1; next }
@@ -65,19 +63,40 @@ generate_commands() {
       in_frontmatter && skip_scripts && /^[[:space:]]/ { next }
       { print }
     ')
-    
-    # Apply other substitutions
+
     body=$(printf '%s\n' "$body" | sed "s/{ARGS}/$arg_format/g" | sed "s/__AGENT__/$agent/g" | rewrite_paths)
-    
+
     case $ext in
       toml)
-        { echo "description = \"$description\""; echo; echo "prompt = \"\"\""; echo "$body"; echo "\"\"\""; } > "$output_dir/$name.$ext" ;;
+        { echo "description = \"$description\""; echo; echo "prompt = \"\"\""; echo "$body"; echo "\"\"\""; } > "$output_dir/${name}.$ext" ;;
       md)
-        echo "$body" > "$output_dir/$name.$ext" ;;
+        echo "$body" > "$output_dir/${name}.$ext" ;;
       prompt.md)
-        echo "$body" > "$output_dir/$name.$ext" ;;
+        echo "$body" > "$output_dir/${name}.$ext" ;;
     esac
+  }
+
+  for template in "$base_dir"/*.md; do
+    [[ -f "$template" ]] || continue
+    local base=$(basename "$template")
+    local source="$template"
+    if [[ -f "$override_dir/$base" ]]; then
+      source="$override_dir/$base"
+      seen["$base"]=1
+    fi
+    process_template "$source" "$base"
   done
+
+  if [[ -d "$override_dir" ]]; then
+    for template in "$override_dir"/*.md; do
+      [[ -f "$template" ]] || continue
+      local base=$(basename "$template")
+      if [[ -n ${seen[$base]:-} ]]; then
+        continue
+      fi
+      process_template "$template" "$base"
+    done
+  fi
 }
 
 build_variant() {
@@ -154,13 +173,17 @@ build_variant() {
     opencode)
       mkdir -p "$base_dir/.opencode/command"
       generate_commands opencode md "\$ARGUMENTS" "$base_dir/.opencode/command" "$script" ;;
+    codex)
+      mkdir -p "$base_dir/.codex/prompts"
+      generate_commands codex md "\$ARGUMENTS" "$base_dir/.codex/prompts" "$script"
+      [[ -f agent_templates/codex/CODEX.md ]] && cp agent_templates/codex/CODEX.md "$base_dir/CODEX.md" ;;
   esac
   ( cd "$base_dir" && zip -r "../spec-kit-template-${agent}-${script}-${NEW_VERSION}.zip" . )
   echo "Created spec-kit-template-${agent}-${script}-${NEW_VERSION}.zip"
 }
 
 # Determine agent list
-ALL_AGENTS=(claude gemini copilot cursor qwen opencode)
+ALL_AGENTS=(claude gemini copilot cursor qwen opencode codex)
 ALL_SCRIPTS=(sh ps)
 
 

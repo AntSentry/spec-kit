@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Codex-specific command templates and prompts aligned with OpenAI Cookbook guidance
+- Sync scripts (`sync-codex-prompts`) for propagating Spec Kit slash commands into Codex
+- Release packaging for `spec-kit-template-codex-{sh,ps}` assets plus `CODEX.md` guidance
+
+### Changed
+
+- CLI codex next steps now highlight prompt sync workflow
+- Agent context scripts (`update-agent-context`) support Codex alongside existing agents
+
 ## [0.0.6] - 2025-09-17
 
 ### Added
@@ -32,4 +43,3 @@ N/A
 ### Changed
 
 N/A
-

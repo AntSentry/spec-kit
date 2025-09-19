@@ -217,7 +217,7 @@ specify init <project_name> --ai codex
 specify init --here --ai claude
 ```
 
-The CLI will check if you have Claude Code, Gemini CLI, Qwen CLI or opencode installed. If you do not, or you prefer to get the templates without checking for the right tools, use `--ignore-agent-tools` with your command:
+The CLI will check if you have Claude Code, Gemini CLI, Qwen CLI, OpenAI Codex CLI, or opencode installed. If you do not, or you prefer to get the templates without checking for the right tools, use `--ignore-agent-tools` with your command:
 
 ```bash
 specify init <project_name> --ai claude --ignore-agent-tools
@@ -407,6 +407,20 @@ Claude Code will spring into action and will start creating the implementation.
 Once the implementation step is done, ask Claude Code to try to run the application and resolve any emerging build errors. If the application runs, but there are _runtime errors_ that are not directly available to Claude Code through CLI logs (e.g., errors rendered in browser logs), copy and paste the error in Claude Code and have it attempt to resolve it.
 
 </details>
+
+### OpenAI Codex IDE setup
+
+If you selected `--ai codex`, the template extracts Codex-optimized prompts under `.codex/prompts/`. Sync them into your Codex installation so slash commands are available in VS Code:
+
+```bash
+# macOS / Linux
+.specify/scripts/bash/sync-codex-prompts.sh
+
+# Windows PowerShell
+powershell -ExecutionPolicy Bypass -File .specify\\scripts\\powershell\\sync-codex-prompts.ps1
+```
+
+This copies `/specify`, `/plan`, `/tasks`, and supporting prompts into `~/.codex/prompts/` with the latest Spec Kit guardrails. Restart Codex (or start a new session) after syncing. See `CODEX.md` for additional integration tips.
 
 ---
 

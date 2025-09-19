@@ -987,10 +987,10 @@ def init(
         steps_lines.append("   - Use /plan to create implementation plans")
         steps_lines.append("   - Use /tasks to generate tasks")
     elif selected_ai == "codex":
-        steps_lines.append(f"{step_num}. Use / commands with OpenAI Codex CLI")
-        steps_lines.append("   - Use /specify to create specifications")
-        steps_lines.append("   - Use /plan to create implementation plans")
-        steps_lines.append("   - Use /tasks to generate tasks")
+        steps_lines.append(f"{step_num}. Prepare OpenAI Codex prompts")
+        steps_lines.append("   - macOS/Linux: run `.specify/scripts/bash/sync-codex-prompts.sh`")
+        steps_lines.append("   - Windows: run `.specify\\scripts\\powershell\\sync-codex-prompts.ps1`")
+        steps_lines.append("   - Afterwards use /specify, /plan, and /tasks inside Codex")
 
     # Removed script variant step (scripts are transparent to users)
     step_num += 1
