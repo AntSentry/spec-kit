@@ -81,14 +81,14 @@ The `specify` command supports the following options:
 | Command     | Description                                                    |
 |-------------|----------------------------------------------------------------|
 | `init`      | Initialize a new Specify project from the latest template      |
-| `check`     | Check for installed tools (`git`, `claude`, `gemini`, `code`/`code-insiders`, `opencode`, `cursor-agent`) |
+| `check`     | Check for installed tools (`git`, `claude`, `gemini`, `code`/`code-insiders`, `opencode`, `cursor-agent`, `codex`) |
 
 ### `specify init` Arguments & Options
 
 | Argument/Option        | Type     | Description                                                                  |
 |------------------------|----------|------------------------------------------------------------------------------|
 | `<project-name>`       | Argument | Name for your new project directory (optional if using `--here`)            |
-| `--ai`                 | Option   | AI assistant to use: `claude`, `gemini`, `copilot`, `opencode`, or `cursor`             |
+| `--ai`                 | Option   | AI assistant to use: `claude`, `gemini`, `copilot`, `opencode`, `cursor`, or `codex`             |
 | `--script`             | Option   | Script variant to use: `sh` (bash/zsh) or `ps` (PowerShell)                 |
 | `--ignore-agent-tools` | Flag     | Skip checks for AI agent tools like Claude Code                             |
 | `--no-git`             | Flag     | Skip git repository initialization                                          |
@@ -107,6 +107,9 @@ specify init my-project --ai claude
 
 # Initialize with Cursor support
 specify init my-project --ai cursor
+
+# Initialize for OpenAI Codex CLI
+specify init my-project --ai codex
 
 # Initialize with PowerShell scripts (Windows/cross-platform)
 specify init my-project --ai copilot --script ps
@@ -170,7 +173,7 @@ Our research and experimentation focus on:
 ## 🔧 Prerequisites
 
 - **Linux/macOS** (or WSL2 on Windows)
-- AI coding agent: [Claude Code](https://www.anthropic.com/claude-code), [GitHub Copilot](https://code.visualstudio.com/), [Gemini CLI](https://github.com/google-gemini/gemini-cli), [Cursor](https://cursor.sh/), [Qwen CLI](https://github.com/QwenLM/qwen-code) or [opencode](https://opencode.ai/)
+- AI coding agent: [Claude Code](https://www.anthropic.com/claude-code), [GitHub Copilot](https://code.visualstudio.com/), [Gemini CLI](https://github.com/google-gemini/gemini-cli), [Cursor](https://cursor.sh/), [Qwen CLI](https://github.com/QwenLM/qwen-code), [OpenAI Codex CLI](https://github.com/openai/codex), or [opencode](https://opencode.ai/)
 - [uv](https://docs.astral.sh/uv/) for package management
 - [Python 3.11+](https://www.python.org/downloads/)
 - [Git](https://git-scm.com/downloads)
@@ -209,11 +212,12 @@ specify init <project_name> --ai gemini
 specify init <project_name> --ai copilot
 specify init <project_name> --ai qwen
 specify init <project_name> --ai opencode
+specify init <project_name> --ai codex
 # Or in current directory:
 specify init --here --ai claude
 ```
 
-The CLI will check if you have Claude Code, Gemini CLI, Qwen CLI or opencode installed. If you do not, or you prefer to get the templates without checking for the right tools, use `--ignore-agent-tools` with your command:
+The CLI will check if you have Claude Code, Gemini CLI, Qwen CLI, OpenAI Codex CLI, or opencode installed. If you do not, or you prefer to get the templates without checking for the right tools, use `--ignore-agent-tools` with your command:
 
 ```bash
 specify init <project_name> --ai claude --ignore-agent-tools
@@ -403,6 +407,20 @@ Claude Code will spring into action and will start creating the implementation.
 Once the implementation step is done, ask Claude Code to try to run the application and resolve any emerging build errors. If the application runs, but there are _runtime errors_ that are not directly available to Claude Code through CLI logs (e.g., errors rendered in browser logs), copy and paste the error in Claude Code and have it attempt to resolve it.
 
 </details>
+
+### OpenAI Codex IDE setup
+
+If you selected `--ai codex`, the template extracts Codex-optimized prompts under `.codex/prompts/`. Sync them into your Codex installation so slash commands are available in VS Code:
+
+```bash
+# macOS / Linux
+.specify/scripts/bash/sync-codex-prompts.sh
+
+# Windows PowerShell
+powershell -ExecutionPolicy Bypass -File .specify\\scripts\\powershell\\sync-codex-prompts.ps1
+```
+
+This copies `/specify`, `/plan`, `/tasks`, and supporting prompts into `~/.codex/prompts/` with the latest Spec Kit guardrails. Restart Codex (or start a new session) after syncing. See `CODEX.md` for additional integration tips.
 
 ---
 

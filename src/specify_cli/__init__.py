@@ -59,7 +59,8 @@ AI_CHOICES = {
     "gemini": "Gemini CLI",
     "cursor": "Cursor",
     "qwen": "Qwen Code",
-    "opencode": "opencode"
+    "opencode": "opencode",
+    "codex": "OpenAI Codex"
 }
 # Add script type choices
 SCRIPT_TYPE_CHOICES = {"sh": "POSIX Shell (bash/zsh)", "ps": "PowerShell"}
@@ -451,6 +452,16 @@ def download_template_from_github(ai_assistant: str, download_dir: Path, *, scri
         asset for asset in release_data.get("assets", [])
         if pattern in asset["name"] and asset["name"].endswith(".zip")
     ]
+
+    # Fallback for Codex: reuse Copilot template if a Codex-specific asset is not published
+    if not matching_assets and ai_assistant == "codex":
+        fallback_pattern = f"spec-kit-template-copilot-{script_type}"
+        matching_assets = [
+            asset for asset in release_data.get("assets", [])
+            if fallback_pattern in asset["name"] and asset["name"].endswith(".zip")
+        ]
+        if verbose and matching_assets:
+            console.print(f"[yellow]Codex template not found. Using Copilot template as fallback.[/yellow]")
     
     if not matching_assets:
         console.print(f"[red]No matching release asset found[/red] for pattern: [bold]{pattern}[/bold]")
@@ -975,6 +986,11 @@ def init(
         steps_lines.append("   - Use /specify to create specifications")
         steps_lines.append("   - Use /plan to create implementation plans")
         steps_lines.append("   - Use /tasks to generate tasks")
+    elif selected_ai == "codex":
+        steps_lines.append(f"{step_num}. Prepare OpenAI Codex prompts")
+        steps_lines.append("   - macOS/Linux: run `.specify/scripts/bash/sync-codex-prompts.sh`")
+        steps_lines.append("   - Windows: run `.specify\\scripts\\powershell\\sync-codex-prompts.ps1`")
+        steps_lines.append("   - Afterwards use /specify, /plan, and /tasks inside Codex")
 
     # Removed script variant step (scripts are transparent to users)
     step_num += 1
@@ -1004,6 +1020,7 @@ def check():
     tracker.add("code", "VS Code (for GitHub Copilot)")
     tracker.add("cursor-agent", "Cursor IDE agent (optional)")
     tracker.add("opencode", "opencode")
+    tracker.add("codex", "OpenAI Codex CLI (optional)")
     
     # Check each tool
     git_ok = check_tool_for_tracker("git", "https://git-scm.com/downloads", tracker)
@@ -1016,6 +1033,7 @@ def check():
         code_ok = check_tool_for_tracker("code-insiders", "https://code.visualstudio.com/insiders/", tracker)
     cursor_ok = check_tool_for_tracker("cursor-agent", "https://cursor.sh/", tracker)
     opencode_ok = check_tool_for_tracker("opencode", "https://opencode.ai/", tracker)
+    codex_ok = check_tool_for_tracker("codex", "https://github.com/openai/codex", tracker)
     
     # Render the final tree
     console.print(tracker.render())
@@ -1026,7 +1044,7 @@ def check():
     # Recommendations
     if not git_ok:
         console.print("[dim]Tip: Install git for repository management[/dim]")
-    if not (claude_ok or gemini_ok or cursor_ok or qwen_ok or opencode_ok):
+    if not (claude_ok or gemini_ok or cursor_ok or qwen_ok or opencode_ok or codex_ok):
         console.print("[dim]Tip: Install an AI assistant for the best experience[/dim]")
 
 

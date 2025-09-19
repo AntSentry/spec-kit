@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - **Linux/macOS** (or Windows; PowerShell scripts now supported without WSL)
-- AI coding agent: [Claude Code](https://www.anthropic.com/claude-code), [GitHub Copilot](https://code.visualstudio.com/), or [Gemini CLI](https://github.com/google-gemini/gemini-cli)
+- AI coding agent: [Claude Code](https://www.anthropic.com/claude-code), [GitHub Copilot](https://code.visualstudio.com/), [Gemini CLI](https://github.com/google-gemini/gemini-cli), or [OpenAI Codex CLI](https://github.com/openai/codex)
 - [uv](https://docs.astral.sh/uv/) for package management
 - [Python 3.11+](https://www.python.org/downloads/)
 - [Git](https://git-scm.com/downloads)
@@ -32,6 +32,7 @@ You can proactively specify your AI agent during initialization:
 uvx --from git+https://github.com/github/spec-kit.git specify init <project_name> --ai claude
 uvx --from git+https://github.com/github/spec-kit.git specify init <project_name> --ai gemini
 uvx --from git+https://github.com/github/spec-kit.git specify init <project_name> --ai copilot
+uvx --from git+https://github.com/github/spec-kit.git specify init <project_name> --ai codex
 ```
 
 ### Specify Script Type (Shell vs PowerShell)
@@ -55,6 +56,7 @@ If you prefer to get the templates without checking for the right tools:
 
 ```bash
 uvx --from git+https://github.com/github/spec-kit.git specify init <project_name> --ai claude --ignore-agent-tools
+uvx --from git+https://github.com/github/spec-kit.git specify init <project_name> --ai codex --ignore-agent-tools
 ```
 
 ## Verification
@@ -65,6 +67,19 @@ After initialization, you should see the following commands available in your AI
 - `/tasks` - Break down into actionable tasks
 
 The `.specify/scripts` directory will contain both `.sh` and `.ps1` scripts.
+
+### Sync Codex prompts (optional)
+
+If you initialized with `--ai codex`, copy the Spec Kit prompts into Codex so the slash commands are available globally:
+
+```bash
+.specify/scripts/bash/sync-codex-prompts.sh
+
+# Windows PowerShell
+powershell -ExecutionPolicy Bypass -File .specify\scripts\powershell\sync-codex-prompts.ps1
+```
+
+Restart Codex after syncing. The prompts live in `~/.codex/prompts/`.
 
 ## Troubleshooting
 
