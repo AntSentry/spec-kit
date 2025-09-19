@@ -14,7 +14,7 @@ Given the implementation details provided as an argument, do this:
    - Success criteria and acceptance criteria
    - Any technical constraints or dependencies mentioned
 
-3. Read the constitution at `/memory/constitution.md` to understand constitutional requirements.
+3. Read the constitution at `/memory/constitution.md` to understand constitutional requirements. Also read any `AGENTS.md` guidance files if present (repo root and feature directory) to apply repository and feature-specific rules per the Agents.md standard.
 
 4. Execute the implementation plan template:
    - Load `/templates/plan-template.md` (already copied to IMPL_PLAN path)

@@ -110,6 +110,8 @@ build_variant() {
   mkdir -p "$SPEC_DIR"
   
   [[ -d memory ]] && { cp -r memory "$SPEC_DIR/"; echo "Copied memory -> .specify"; }
+  # Include root-level AGENTS.md if present
+  [[ -f AGENTS.md ]] && { cp AGENTS.md "$base_dir/AGENTS.md"; echo "Copied AGENTS.md -> package root"; }
   
   # Only copy the relevant script variant directory
   if [[ -d scripts ]]; then

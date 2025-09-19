@@ -1089,6 +1089,7 @@ def doctor():
         ("python", "Python available"),
         ("compile", "Compile CLI (import/bytecode)"),
         ("pkg-script", "Packaging script present"),
+        ("agents-md", "AGENTS.md present (optional)"),
         ("codex-sync-sh", "Codex sync (bash) present"),
         ("codex-sync-ps1", "Codex sync (PowerShell) present"),
         ("codex-templates", "Codex templates present"),
@@ -1114,6 +1115,7 @@ def doctor():
     # File presence checks
     root = Path(__file__).resolve().parents[2]
     tracker.complete("pkg-script", "ok") if (root / ".github/workflows/scripts/create-release-packages.sh").exists() else tracker.error("pkg-script", "missing")
+    tracker.complete("agents-md", "ok") if (root / "AGENTS.md").exists() else tracker.skip("agents-md", "not found")
     tracker.complete("codex-sync-sh", "ok") if (root / "scripts/bash/sync-codex-prompts.sh").exists() else tracker.error("codex-sync-sh", "missing")
     tracker.complete("codex-sync-ps1", "ok") if (root / "scripts/powershell/sync-codex-prompts.ps1").exists() else tracker.error("codex-sync-ps1", "missing")
     tracker.complete("codex-templates", "ok") if (root / "templates/commands/codex").exists() else tracker.error("codex-templates", "missing")

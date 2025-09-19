@@ -48,6 +48,25 @@ This repository contains Spec Kit, a spec-driven development toolkit and the `sp
 - The CLI downloads release assets of the form `spec-kit-template-<ai>-<script>.zip`.
 - For `--ai codex`, the CLI falls back to `copilot` assets if a Codex-specific asset is unavailable, ensuring no degraded experience.
 
+## Agents.md Standard (OpenAI)
+
+This repo adopts the Agents.md guidance model for agent behavior. See:
+- https://agents.md/
+- https://github.com/openai/agents.md
+
+How it’s used during Spec Kit phases:
+- `/specify` reads and applies rules from the repo‑root `AGENTS.md` and any feature‑level `AGENTS.md` (if present) to shape specification tone, scope, and constraints.
+- `/plan` considers `AGENTS.md` when making technology, safety, and process decisions; it augments the constitution, not replaces it.
+- `/tasks` uses `AGENTS.md` to emphasize guardrails (e.g., testing first, security posture) when generating task sequences.
+- `/implement` treats `AGENTS.md` as guardrails for batch size, approvals, and commit policies.
+
+Scope precedence follows Agents.md merging rules:
+1) Global (user-level) AGENTS.md
+2) Repo‑root AGENTS.md (this file)
+3) Feature/dir AGENTS.md (more specific overrides)
+
+Packaging: the release archives include the repo‑root `AGENTS.md` so projects start with shared guidance by default.
+
 ## Contact
 
 For broader changes, update docs under `docs/` and `README.md` together with CLI behavior to keep user-facing guidance in sync.

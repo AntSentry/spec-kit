@@ -10,6 +10,7 @@ Given the context provided as an argument, do this:
 1. Run `{SCRIPT}` from repo root and parse FEATURE_DIR and AVAILABLE_DOCS list. All paths must be absolute.
 2. Load and analyze available design documents:
    - Always read plan.md for tech stack and libraries
+   - IF EXISTS: Read AGENTS.md files (repo root and feature directory) for agent guidance and guardrails
    - IF EXISTS: Read data-model.md for entities
    - IF EXISTS: Read contracts/ for API endpoints
    - IF EXISTS: Read research.md for technical decisions
