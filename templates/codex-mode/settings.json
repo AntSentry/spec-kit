@@ -1,0 +1,12 @@
+{
+  "files.associations": {
+    "*.jsonl": "json"
+  },
+  "json.schemas": [
+    {
+      "fileMatch": ["/.vscode/codex-mode-policy.json"],
+      "url": "/.vscode/codex-mode-policy.schema.json"
+    }
+  ]
+}
+

@@ -178,7 +178,17 @@ build_variant() {
     codex)
       mkdir -p "$base_dir/.codex/prompts"
       generate_commands codex md "\$ARGUMENTS" "$base_dir/.codex/prompts" "$script"
-      [[ -f agent_templates/codex/CODEX.md ]] && cp agent_templates/codex/CODEX.md "$base_dir/CODEX.md" ;;
+      [[ -f agent_templates/codex/CODEX.md ]] && cp agent_templates/codex/CODEX.md "$base_dir/CODEX.md"
+      # Include Mode Orchestrator files in .vscode
+      if [[ -d templates/codex-mode ]]; then
+        mkdir -p "$base_dir/.vscode"
+        cp templates/codex-mode/codex-mode-policy.schema.json "$base_dir/.vscode/" || true
+        cp templates/codex-mode/codex-mode-policy.json "$base_dir/.vscode/" || true
+        cp templates/codex-mode/codex-controller-preamble.txt "$base_dir/.vscode/" || true
+        cp templates/codex-mode/settings.json "$base_dir/.vscode/" || true
+        echo "Copied Codex Mode Orchestrator files into .vscode"
+      fi
+      ;;
   esac
   ( cd "$base_dir" && zip -r "../spec-kit-template-${agent}-${script}-${NEW_VERSION}.zip" . )
   echo "Created spec-kit-template-${agent}-${script}-${NEW_VERSION}.zip"

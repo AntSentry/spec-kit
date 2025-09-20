@@ -1,0 +1,130 @@
+{
+  "$id": "https://example.local/schemas/codex-mode-policy.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Codex Mode Policy",
+  "type": "object",
+  "required": [
+    "version",
+    "defaults",
+    "profiles",
+    "risk_gates",
+    "downgrade_rules",
+    "upgrade_rules",
+    "telemetry"
+  ],
+  "properties": {
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+$" },
+    "defaults": {
+      "type": "object",
+      "required": [
+        "model",
+        "reasoning",
+        "approval_mode",
+        "max_files_without_prompt",
+        "max_loc_without_prompt"
+      ],
+      "properties": {
+        "model": { "enum": ["gpt-5", "gpt-5-codex"] },
+        "reasoning": { "enum": ["minimal", "low", "medium", "high"] },
+        "approval_mode": { "enum": ["chat", "agent", "agent_full"] },
+        "max_files_without_prompt": { "type": "integer", "minimum": 1 },
+        "max_loc_without_prompt": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "profiles": {
+      "type": "object",
+      "required": [
+        "docs_spec",
+        "tiny_fix",
+        "multi_file_feature",
+        "refactor_wide",
+        "research_review",
+        "config_ops"
+      ],
+      "additionalProperties": false,
+      "patternProperties": {
+        ".*": {
+          "type": "object",
+          "required": ["model", "reasoning", "approval_mode"],
+          "properties": {
+            "model": { "enum": ["gpt-5", "gpt-5-codex"] },
+            "reasoning": { "enum": ["minimal", "low", "medium", "high"] },
+            "approval_mode": { "enum": ["chat", "agent", "agent_full"] }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "risk_gates": {
+      "type": "object",
+      "required": [
+        "protected_branches",
+        "max_files_edit_auto",
+        "max_loc_edit_auto",
+        "allow_network_in_agent",
+        "allow_full_access_on_protected",
+        "timeboxed_full_access_minutes"
+      ],
+      "properties": {
+        "protected_branches": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "max_files_edit_auto": { "type": "integer", "minimum": 1 },
+        "max_loc_edit_auto": { "type": "integer", "minimum": 1 },
+        "allow_network_in_agent": { "type": "boolean" },
+        "allow_full_access_on_protected": { "type": "boolean" },
+        "timeboxed_full_access_minutes": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "downgrade_rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["when", "then"],
+        "properties": {
+          "when": { "type": "string", "minLength": 1 },
+          "then": {
+            "type": "object",
+            "properties": {
+              "approval_mode": { "enum": ["chat", "agent"] },
+              "reasoning": { "enum": ["minimal", "low", "medium", "high"] },
+              "require_confirmation": { "type": "boolean" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "upgrade_rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["when", "then"],
+        "properties": {
+          "when": { "type": "string", "minLength": 1 },
+          "then": {
+            "type": "object",
+            "properties": {
+              "approval_mode": { "enum": ["agent_full"] },
+              "reasoning": { "enum": ["minimal", "low", "medium", "high"] }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "telemetry": {
+      "type": "object",
+      "required": ["log_file", "redact_paths"],
+      "properties": {
+        "log_file": { "type": "string" },
+        "redact_paths": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
+

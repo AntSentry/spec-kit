@@ -1,0 +1,55 @@
+{
+  "version": "1.1",
+  "defaults": {
+    "model": "gpt-5",
+    "reasoning": "medium",
+    "approval_mode": "chat",
+    "max_files_without_prompt": 3,
+    "max_loc_without_prompt": 80
+  },
+  "profiles": {
+    "docs_spec":         { "model": "gpt-5",       "reasoning": "high",   "approval_mode": "chat" },
+    "tiny_fix":          { "model": "gpt-5-codex", "reasoning": "low",    "approval_mode": "agent" },
+    "multi_file_feature":{ "model": "gpt-5-codex", "reasoning": "medium", "approval_mode": "agent" },
+    "refactor_wide":     { "model": "gpt-5-codex", "reasoning": "high",   "approval_mode": "agent_full" },
+    "research_review":   { "model": "gpt-5",       "reasoning": "high",   "approval_mode": "chat" },
+    "config_ops":        { "model": "gpt-5-codex", "reasoning": "medium", "approval_mode": "agent" }
+  },
+  "risk_gates": {
+    "protected_branches": ["main", "master", "release/*"],
+    "max_files_edit_auto": 10,
+    "max_loc_edit_auto": 400,
+    "allow_network_in_agent": false,
+    "allow_full_access_on_protected": false,
+    "timeboxed_full_access_minutes": 30
+  },
+  "downgrade_rules": [
+    {
+      "when": "branch_matches(protected_branches)",
+      "then": { "approval_mode": "agent" }
+    },
+    {
+      "when": "predicted_file_edits > max_files_edit_auto or predicted_loc > max_loc_edit_auto",
+      "then": { "require_confirmation": true, "approval_mode": "agent" }
+    },
+    {
+      "when": "ci_absent() and task_type == 'refactor_wide'",
+      "then": { "approval_mode": "agent" }
+    },
+    {
+      "when": "network_calls_detected() and allow_network_in_agent == false and approval_mode == 'agent'",
+      "then": { "require_confirmation": true }
+    }
+  ],
+  "upgrade_rules": [
+    {
+      "when": "task_type == 'refactor_wide' and on_feature_branch() and ci_present() and within_timebox(timeboxed_full_access_minutes)",
+      "then": { "approval_mode": "agent_full", "reasoning": "high" }
+    }
+  ],
+  "telemetry": {
+    "log_file": ".vscode/codex-mode-log.jsonl",
+    "redact_paths": ["**/.env", "**/secrets/**"]
+  }
+}
+
